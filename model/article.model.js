@@ -20,7 +20,6 @@ function table_posts() {
       },
       title: {
         type: Sequelize.STRING(200),
-        unique: true,
         allowNull: false,
       },
       content: {
@@ -29,13 +28,12 @@ function table_posts() {
       },
       category: {
         type: Sequelize.STRING(100),
-        unique: true,
         allowNull: false,
       },
       status: {
         type: Sequelize.STRING(100),
         allowNull: false,
-        comment: "Publish, Draft, Trash",
+        comment: "publish|draft|trash",
       },
     },
     {

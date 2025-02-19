@@ -10,7 +10,7 @@ exports.store = async (req, res, next) => {
     title: "required|string|min:20",
     content: "required|string|min:200",
     category: "required|string|min:3",
-    status: "required|string|in:publish,draft,thrash",
+    status: "required|string|in:publish,draft,trash",
   };
 
   const error_msg = {
@@ -67,10 +67,11 @@ exports.store = async (req, res, next) => {
 };
 
 exports.lists = async (req, res, next) => {
-  let { limit, offset } = req.query;
+  let { limit, offset, status } = req.query;
   var message = [];
   offset = parseInt(offset) || 0;
   limit = parseInt(limit) || 10;
+  const query_order = [["createdAt", "desc"]];
 
   const rules = {};
 
@@ -92,9 +93,15 @@ exports.lists = async (req, res, next) => {
 
   async function passes() {
     try {
+      const where = {};
+      if (status) {
+        where.status = status;
+      }
       const data = await PostsArticle.findAndCountAll({
+        where,
         limit,
         offset,
+        order: query_order,
       });
       return res.status(200).json({
         code: 200,
@@ -182,6 +189,7 @@ exports.info = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   const { id, title, content, category, status } = req.body;
+  console.log(req.body);
   var message = [];
 
   Validator.registerAsync(
@@ -224,7 +232,7 @@ exports.update = async (req, res, next) => {
       var value = validation.errors.all()[key];
       message.push(value[0]);
     }
-    res.status(404).json({
+    res.status(200).json({
       code: 404,
       status: "error",
       message: message,
@@ -315,7 +323,10 @@ exports.destroy = async (req, res, next) => {
 
   async function passes() {
     try {
-      await PostsArticle.destroy({
+      const params = {
+        status: "trash",
+      };
+      await PostsArticle.update(params, {
         where: {
           id,
         },
